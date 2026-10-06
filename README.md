@@ -200,3 +200,40 @@ Manda agora várias rajadas de tiros (uma de cada vez) e eu devolvo o JSON da re
 
 </details>
 
+
+---
+
+## Treino do oponente de IA - Estratégia do jogo (Parte D)
+
+Joguei 2 jogos completos contra o LLM. O LLM disparava as rajadas em JSON, eu introduzia-as no programa (`rajada X1 Y2 Z3`) e devolvia o JSON da resposta. Nos dois jogos o LLM afundou a frota inteira.
+
+| | Jogo 1 (prompt do guião) | Jogo 2 (prompt melhorado) |
+|---|---|---|
+| Rajadas até afundar a frota | 20 | 22 |
+| Tiros certeiros | 27/60 (45%) | 27/66 (41%) |
+
+**Erros observados no jogo 1, que levaram às melhorias do prompt:**
+1. Depois de acertar num navio, usava só 1 dos 3 tiros para o perseguir.
+2. Disparava para o lado de um navio que já tinha dado água (ex.: B3, quando B4 era água e a Nau só podia continuar para B7).
+3. Disparava em diagonais de tiros certeiros (ex.: B1, diagonal de A2 e C2).
+4. Não tratava as respostas ambíguas (ex.: "Barca afundada em F10 ou I4") e disparava depois no halo de uma das hipóteses.
+5. A meio do jogo chegou a demorar vários minutos por jogada, a reanalisar o tabuleiro inteiro.
+
+**Conclusões:** no jogo 2, a perseguição de navios atingidos melhorou claramente (2 a 3 tiros por rajada nas casas contíguas) e deixou de haver tiros em diagonais e halos. O número de rajadas não baixou por dois motivos: houve azar na exploração inicial (9 tiros na água nas 3 primeiras rajadas) e, como a resposta do protocolo é agregada, a frota com muitos navios pequenos nos cantos gerou muitas respostas ambíguas na fase final. O LLM guardou o Diário de Bordo num ficheiro (`diario_jogo.md`), o que resolveu o problema de memória entre jogadas.
+
+### Prompt final da estratégia
+
+```
+Considere a seguinte tática de geração de rajadas de tiros.
+• Crie um Diário de Bordo com o registo de cada rajada disparada, numerando-as sequencialmente (Rajada 1, 2, 3...). Guarde as coordenadas exatas de cada tiro e o respetivo resultado (Água, Nau atingida, Barca afundada, etc.). A memória é a principal arma de um bom estratega.
+• Não dispare fora dos limites do mapa (ex: Z99) nem repita tiros em coordenadas já testadas. A única exceção para este desperdício de pólvora é a última rajada do jogo, apenas para perfazer os 3 tiros obrigatórios quando a frota inimiga já estiver irremediavelmente no fundo do mar.
+• Se atingir um navio numa rajada, dispare nas posições contíguas (Norte, Sul, Este, Oeste) na jogada seguinte para descobrir a orientação da embarcação e acabar de a afundar. No entanto, se a rajada anterior confirmar que o navio já foi afundado, não dispare para as posições contíguas, pois os navios nunca estão encostados.
+• Prioridade à caça: enquanto houver um navio atingido e não afundado, use os 3 tiros da rajada nas posições contíguas desse navio, e não em exploração.
+• Quando já souber a orientação de um navio e uma das extremidades já tiver dado água, dispare apenas para a outra extremidade.
+• Como as Caravelas, Naus e Fragatas são linhas retas, um tiro certeiro significa que o resto do navio está na horizontal ou na vertical. Como os navios não se podem tocar (nem sequer nos cantos), as posições diagonais a um tiro certeiro são garantidamente água (a única exceção é o corpo do Galeão, devido à sua forma em T). Evitar estas diagonais poupa imensos tiros. Esta regra aplica-se também quando não sabe qual dos tiros acertou: as diagonais de todos os candidatos são de evitar.
+• Quando o relatório de uma rajada confirmar que um navio foi afundado (ex: Fragata de 4 posições), analise os dados do seu Diário de Bordo para identificar exatamente onde caíram esses tiros. Confirmada a posição exata da carcaça, marque todas as quadrículas adjacentes (o halo de 1 posição em redor do navio) como água intransitável. É impossível haver outra embarcação nesse perímetro.
+• Respostas ambíguas: como a resposta é agregada, pode não saber qual dos tiros afundou um navio (ex: "Barca afundada" com tiros em F10 e I4). Nesse caso, registe as hipóteses no Diário e trate o halo de todas elas como zona de baixa prioridade até a ambiguidade ficar resolvida.
+• Na exploração, escolha casas afastadas dos tiros anteriores e dos halos, onde ainda caibam os navios que faltam afundar.
+• Seja conciso: em cada jogada atualize o Diário e responda apenas com a rajada em JSON e uma linha de justificação.
+• Se a sua frota for toda afundada, declare a derrota com honra. Em contrapartida, seja um vencedor magnânimo se for o inimigo a render-se com os navios todos no fundo do oceano!
+```
