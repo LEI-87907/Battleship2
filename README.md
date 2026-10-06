@@ -1,3 +1,15 @@
+# Battleship2 – Ficha 2 de Engenharia de Software
+
+| Curso  | Número | Nome          | GitHub    |
+|--------|--------|---------------|-----------|
+| LEI-PL | 87907  | Pedro Vicente | LEI-87907 |
+
+- **Vídeo de demonstração:** *(link do YouTube a acrescentar)*
+- **User story implementada:** [#1 Exportar o histórico de rajadas para PDF](https://github.com/LEI-87907/Battleship2/issues/1)
+- **Documentação (GitHub Pages):** https://lei-87907.github.io/Battleship2/
+
+---
+
 # ⚓ Battleship 2.0
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
@@ -146,6 +158,45 @@ Contributions are what make the open-source community such an amazing place to l
 ## 📄 License
 Distributed under the MIT License. See `LICENSE` for more information.
 
+
 ---
 **Maintained by:** [@britoeabreu](https://github.com/britoeabreu)  
 *Created for the Software Engineering students at ISCTE-IUL.*
+
+
+---
+
+## Treino do oponente de IA - Protocolo de comunicação (Parte C)
+
+**LLM utilizado:** Claude (Anthropic)
+
+1. Expliquei as regras da Batalha Naval dos Descobrimentos com o prompt da secção C2 do guião.
+2. Pedi 4 tabuleiros, com o Galeão virado a Norte, Sul, Este e Oeste. Os 4 respeitaram as regras: 11 navios, sem contacto entre navios e Galeão em forma de T.
+3. Ensinei o protocolo JSON com *few-shot prompting*. 
+4. Joguei várias rajadas: introduzi cada rajada do LLM no programa e devolvi o JSON gerado.
+5. O LLM confirmou que domina o protocolo.
+
+
+<details>
+<summary><b>Prompts utilizados na Parte C</b> (clicar para expandir)</summary>
+
+**1. Regras do jogo (C2):** prompt do guião, sem alterações.
+
+**2. Verificação dos tabuleiros (C3):**
+```
+Mostre-me um tabuleiro criado com estas regras, com o Galeão virado a Norte. Deixa as posições da água em branco para melhor visualização das posições dos navios.
+Mostre-me um tabuleiro criado com estas regras, com o Galeão virado a Sul.
+Mostre-me um tabuleiro criado com estas regras, com o Galeão virado a Este.
+Mostre-me um tabuleiro criado com estas regras, com o Galeão virado a Oeste.
+```
+
+**3. Protocolo JSON (C4), com o formato da rajada corrigido para array:**
+```
+A nossa interação será através de objetos JSON, quer para a rajada de 3 tiros, quer para a correspondente resposta. Uma rajada tem o seguinte formato (um array com 3 tiros):
+[ {"row": "A", "column": 5}, {"row": "C", "column": 10}, {"row": "F", "column": 5} ]
+A resposta a uma rajada é feita em conjunto e não tiro a tiro 
+Manda agora várias rajadas de tiros (uma de cada vez) e eu devolvo o JSON da resposta. Pare só quando tiver aprendido o protocolo de comunicação do jogo.
+```
+
+</details>
+
