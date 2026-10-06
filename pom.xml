@@ -71,6 +71,8 @@
 
 		<jackson.version>2.18.11</jackson.version>
 
+		<pdfbox.version>3.0.8</pdfbox.version>
+
 		<allure.version>2.31.0</allure.version>
 
 		<jetbrains.annotations.version>26.1.0</jetbrains.annotations.version>
@@ -124,6 +126,13 @@
 			<groupId>io.qameta.allure</groupId>
 			<artifactId>allure-java-commons-test</artifactId>
 			<version>${allure.version}</version>
+		</dependency>
+
+		<!-- Apache PDFBox: exportação do histórico de rajadas para PDF -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>${pdfbox.version}</version>
 		</dependency>
 
 		<!-- Source: https://mvnrepository.com/artifact/org.jetbrains/annotations -->
