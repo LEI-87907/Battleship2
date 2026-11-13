@@ -186,4 +186,84 @@ import java.util.ArrayList;
 			fleet.addShip(ship);
 			assertDoesNotThrow(fleet::printStatus, "Error: printStatus should not throw any exceptions.");
 		}
+
+	/**
+	 * Test for the addShip method when the fleet is already full.
+	 */
+	@Test
+	@DisplayName("addShip recusa navios quando a frota já está cheia")
+	void testAddShipFleetFull() {
+		for (int row = 0; row < Game.BOARD_SIZE; row += 2)
+			for (int column = 0; column < Game.BOARD_SIZE; column += 2)
+				fleet.addShip(new Barge(Compass.NORTH, new Position(row, column)));
+
+		int size = fleet.getShips().size();
+		assertTrue(size >= Fleet.FLEET_SIZE, "Error: The fleet should have reached its size limit.");
+		assertFalse(fleet.addShip(new Barge(Compass.NORTH, new Position(9, 9))), "Error: A full fleet should not accept more ships.");
+		assertEquals(size, fleet.getShips().size(), "Error: The size of a full fleet should not change.");
+	}
+
+	/**
+	 * Test for the getSunkShips method.
+	 */
+	@Test
+	@DisplayName("getSunkShips devolve só os navios afundados")
+	void testGetSunkShips() {
+		IShip ship1 = new Barge(Compass.NORTH, new Position(1, 1));
+		IShip ship2 = new Barge(Compass.NORTH, new Position(5, 5));
+		fleet.addShip(ship1);
+		fleet.addShip(ship2);
+		assertTrue(fleet.getSunkShips().isEmpty(), "Error: No ship should be sunk at the beginning.");
+
+		ship1.sink();
+		List<IShip> sunkShips = fleet.getSunkShips();
+		assertEquals(1, sunkShips.size(), "Error: Only one ship should be sunk.");
+		assertSame(ship1, sunkShips.get(0), "Error: The sunk ship is incorrect.");
+	}
+
+	/**
+	 * Test for the methods that print ships.
+	 */
+	@Test
+	@DisplayName("Os métodos print mostram os navios na consola")
+	void testPrintMethods() {
+		IShip barge = new Barge(Compass.NORTH, new Position(1, 1));
+		IShip caravel = new Caravel(Compass.EAST, new Position(5, 5));
+		fleet.addShip(barge);
+		fleet.addShip(caravel);
+
+		java.io.PrintStream original = System.out;
+		java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream();
+		System.setOut(new java.io.PrintStream(output));
+		try {
+			fleet.printAllShips();
+			fleet.printFloatingShips();
+			fleet.printShipsByCategory("Barca");
+		} finally {
+			System.setOut(original);
+		}
+
+		String text = output.toString();
+		assertTrue(text.contains(barge.toString()), "Error: The barge should be printed.");
+		assertTrue(text.contains(caravel.toString()), "Error: The caravel should be printed.");
+	}
+
+	/**
+	 * Test for the assertions of the methods that receive arguments.
+	 */
+	@Test
+	@DisplayName("Os métodos da frota rejeitam argumentos nulos")
+	void testNullArguments() throws Exception {
+		assertThrows(AssertionError.class, () -> fleet.addShip(null), "Error: addShip should reject null.");
+		assertThrows(AssertionError.class, () -> fleet.getShipsLike(null), "Error: getShipsLike should reject null.");
+		assertThrows(AssertionError.class, () -> fleet.shipAt(null), "Error: shipAt should reject null.");
+		assertThrows(AssertionError.class, () -> fleet.printShips(null), "Error: printShips should reject null.");
+		assertThrows(AssertionError.class, () -> fleet.printShipsByCategory(null), "Error: printShipsByCategory should reject null.");
+
+		var method = Fleet.class.getDeclaredMethod("colisionRisk", IShip.class);
+		method.setAccessible(true);
+		var exception = assertThrows(java.lang.reflect.InvocationTargetException.class,
+				() -> method.invoke(fleet, (Object) null), "Error: colisionRisk should reject null.");
+		assertInstanceOf(AssertionError.class, exception.getCause(), "Error: colisionRisk should fail with an AssertionError.");
+	}
 	}
