@@ -142,6 +142,13 @@ mvn test
 > [!TIP]
 > Use the `-Dtest=ClassName` flag to run specific test suites during development.
 
+### Integração contínua (Ficha 4)
+O workflow **Java CI with Maven** (`.github/workflows/maven.yml`) compila o projeto e corre todos os testes JUnit com o Java 21:
+- em cada push, para qualquer ramo (por exemplo, `UnitTests_87907`);
+- em cada pull request para o `main`.
+
+O resultado de cada execução aparece no separador **Actions** do repositório.
+
 ---
 
 ## 🤝 Contributing
