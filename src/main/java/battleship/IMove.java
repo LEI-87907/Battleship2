@@ -23,9 +23,6 @@ public interface IMove {
 		return new Move(moveNumber, moveShots, new ArrayList<>());
 	}
 
-	@Override
-	String toString();
-
 	int getNumber();
 
 	List<IPosition> getShots();

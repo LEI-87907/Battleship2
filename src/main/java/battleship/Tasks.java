@@ -73,11 +73,7 @@ public class Tasks {
 						myFleet.printStatus();
 						game.printMyBoard(true, false);
 
-						if (game.getRemainingShips() == 0) {
-							game.over();
-							exportReport(game);
-							System.exit(0);
-						}
+						endGameIfOver(game);
 					}
 					break;
 				case SIMULA:
@@ -93,11 +89,7 @@ public class Tasks {
 							}
 						}
 
-						if (game.getRemainingShips() == 0) {
-							game.over();
-							exportReport(game);
-							System.exit(0);
-						}
+						endGameIfOver(game);
 					}
 					break;
 				case TIROS:
@@ -125,6 +117,14 @@ public class Tasks {
 	/**
 	 * This function provides help information about the menu commands.
 	 */
+	private static void endGameIfOver(IGame game) {
+		if (game.getRemainingShips() == 0) {
+			game.over();
+			exportReport(game);
+			System.exit(0);
+		}
+	}
+
 	public static void menuHelp() {
 		System.out.println("======================= AJUDA DO MENU =========================");
 		System.out.println("Digite um dos comandos abaixo para interagir com o jogo:");
