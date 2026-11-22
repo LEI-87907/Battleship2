@@ -28,6 +28,9 @@ public final class GameReportPdf {
     private static final float MARGIN = 50;
     private static final float FONT_SIZE = 11;
     private static final float LEADING = 15;
+    private static final int TITLE_SIZE = 16;
+    private static final int SECTION_SIZE = 13;
+    private static final int LEGEND_SIZE = 9;
 
     private static final PDType1Font FONT = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
     private static final PDType1Font FONT_BOLD = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
@@ -70,12 +73,12 @@ public final class GameReportPdf {
         try (PDDocument doc = new PDDocument()) {
             PageWriter out = new PageWriter(doc);
 
-            out.line(FONT_BOLD, 16, "Batalha Naval - Relatório do jogo");
+            out.line(FONT_BOLD, TITLE_SIZE, "Batalha Naval - Relatório do jogo");
             out.line(FONT, FONT_SIZE, "Gerado em "
                     + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
             out.blank();
 
-            out.line(FONT_BOLD, 13, "Rajadas");
+            out.line(FONT_BOLD, SECTION_SIZE, "Rajadas");
             List<IMove> moves = game.getAlienMoves();
             if (moves.isEmpty())
                 out.line(FONT, FONT_SIZE, "Ainda não foi disparada nenhuma rajada.");
@@ -83,7 +86,7 @@ public final class GameReportPdf {
                 out.line(FONT, FONT_SIZE, describeMove(move));
             out.blank();
 
-            out.line(FONT_BOLD, 13, "Resumo");
+            out.line(FONT_BOLD, SECTION_SIZE, "Resumo");
             out.line(FONT, FONT_SIZE, "Rajadas disparadas: " + moves.size());
             out.line(FONT, FONT_SIZE, "Tiros certeiros: " + game.getHits());
             out.line(FONT, FONT_SIZE, "Navios afundados: " + game.getSunkShips());
@@ -96,10 +99,10 @@ public final class GameReportPdf {
             out.blank();
 
             out.ensureSpace(Game.BOARD_SIZE + 3); // o tabuleiro não deve ficar partido entre páginas
-            out.line(FONT_BOLD, 13, "Tabuleiro final");
+            out.line(FONT_BOLD, SECTION_SIZE, "Tabuleiro final");
             for (String row : boardLines(game.getMyFleet(), moves))
                 out.line(FONT_MONO, FONT_SIZE, row);
-            out.line(FONT, 9, "Legenda: '#' navio, '*' tiro certeiro, 'o' tiro na água, '.' água");
+            out.line(FONT, LEGEND_SIZE, "Legenda: '#' navio, '*' tiro certeiro, 'o' tiro na água, '.' água");
 
             out.close();
             doc.save(file);
