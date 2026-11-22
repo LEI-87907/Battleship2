@@ -1,0 +1,389 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > GameReportPdf</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">battleship</a>
+</div>
+
+<h1>Coverage Summary for Class: GameReportPdf (battleship)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GameReportPdf</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.4%
+  </span>
+  <span class="absValue">
+    (51/54)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98.8%
+  </span>
+  <span class="absValue">
+    (83/84)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">GameReportPdf$PageWriter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (21/21)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95%
+  </span>
+  <span class="absValue">
+    (57/60)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    99%
+  </span>
+  <span class="absValue">
+    (104/105)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package battleship;
+&nbsp;
+&nbsp;import org.apache.pdfbox.pdmodel.PDDocument;
+&nbsp;import org.apache.pdfbox.pdmodel.PDPage;
+&nbsp;import org.apache.pdfbox.pdmodel.PDPageContentStream;
+&nbsp;import org.apache.pdfbox.pdmodel.common.PDRectangle;
+&nbsp;import org.apache.pdfbox.pdmodel.font.PDType1Font;
+&nbsp;import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Exporta para PDF o histórico de rajadas de um jogo, usando a biblioteca Apache PDFBox.
+&nbsp; * &lt;p&gt;
+&nbsp; * O relatório contém a data e hora, cada rajada com as coordenadas dos tiros e o respetivo
+&nbsp; * resultado, um resumo final e o tabuleiro com os tiros recebidos.
+&nbsp; */
+<b class="fc">&nbsp;public final class GameReportPdf {</b>
+&nbsp;
+&nbsp;    /** Pasta onde os relatórios são gravados. */
+&nbsp;    public static final String REPORTS_DIR = &quot;reports&quot;;
+&nbsp;
+&nbsp;    private static final float MARGIN = 50;
+&nbsp;    private static final float FONT_SIZE = 11;
+&nbsp;    private static final float LEADING = 15;
+&nbsp;
+<b class="fc">&nbsp;    private static final PDType1Font FONT = new PDType1Font(Standard14Fonts.FontName.HELVETICA);</b>
+<b class="fc">&nbsp;    private static final PDType1Font FONT_BOLD = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);</b>
+<b class="fc">&nbsp;    private static final PDType1Font FONT_MONO = new PDType1Font(Standard14Fonts.FontName.COURIER);</b>
+&nbsp;
+&nbsp;    private GameReportPdf() {
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gera o relatório do jogo numa pasta {@value #REPORTS_DIR}, com um nome que inclui a data e a hora,
+&nbsp;     * para não apagar relatórios anteriores.
+&nbsp;     *
+&nbsp;     * @param game o jogo a exportar
+&nbsp;     * @return o ficheiro PDF criado
+&nbsp;     * @throws IOException se não for possível escrever o ficheiro
+&nbsp;     */
+&nbsp;    public static File export(IGame game) throws IOException {
+<b class="fc">&nbsp;        assert game != null;</b>
+&nbsp;
+<b class="fc">&nbsp;        File dir = new File(REPORTS_DIR);</b>
+<b class="pc">&nbsp;        if (!dir.exists() &amp;&amp; !dir.mkdirs())</b>
+<b class="nc">&nbsp;            throw new IOException(&quot;Não foi possível criar a pasta &quot; + dir.getAbsolutePath());</b>
+&nbsp;
+<b class="fc">&nbsp;        String stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyyMMdd_HHmmss&quot;));</b>
+<b class="fc">&nbsp;        File file = new File(dir, &quot;jogo_&quot; + stamp + &quot;.pdf&quot;);</b>
+<b class="fc">&nbsp;        export(game, file);</b>
+<b class="fc">&nbsp;        return file;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Gera o relatório do jogo no ficheiro indicado.
+&nbsp;     *
+&nbsp;     * @param game o jogo a exportar
+&nbsp;     * @param file o ficheiro de destino
+&nbsp;     * @throws IOException se não for possível escrever o ficheiro
+&nbsp;     */
+&nbsp;    public static void export(IGame game, File file) throws IOException {
+<b class="fc">&nbsp;        assert game != null &amp;&amp; file != null;</b>
+&nbsp;
+<b class="fc">&nbsp;        try (PDDocument doc = new PDDocument()) {</b>
+<b class="fc">&nbsp;            PageWriter out = new PageWriter(doc);</b>
+&nbsp;
+<b class="fc">&nbsp;            out.line(FONT_BOLD, 16, &quot;Batalha Naval - Relatório do jogo&quot;);</b>
+<b class="fc">&nbsp;            out.line(FONT, FONT_SIZE, &quot;Gerado em &quot;</b>
+<b class="fc">&nbsp;                    + LocalDateTime.now().format(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy HH:mm:ss&quot;)));</b>
+<b class="fc">&nbsp;            out.blank();</b>
+&nbsp;
+<b class="fc">&nbsp;            out.line(FONT_BOLD, 13, &quot;Rajadas&quot;);</b>
+<b class="fc">&nbsp;            List&lt;IMove&gt; moves = game.getAlienMoves();</b>
+<b class="fc">&nbsp;            if (moves.isEmpty())</b>
+<b class="fc">&nbsp;                out.line(FONT, FONT_SIZE, &quot;Ainda não foi disparada nenhuma rajada.&quot;);</b>
+<b class="fc">&nbsp;            for (IMove move : moves)</b>
+<b class="fc">&nbsp;                out.line(FONT, FONT_SIZE, describeMove(move));</b>
+<b class="fc">&nbsp;            out.blank();</b>
+&nbsp;
+<b class="fc">&nbsp;            out.line(FONT_BOLD, 13, &quot;Resumo&quot;);</b>
+<b class="fc">&nbsp;            out.line(FONT, FONT_SIZE, &quot;Rajadas disparadas: &quot; + moves.size());</b>
+<b class="fc">&nbsp;            out.line(FONT, FONT_SIZE, &quot;Tiros certeiros: &quot; + game.getHits());</b>
+<b class="fc">&nbsp;            out.line(FONT, FONT_SIZE, &quot;Navios afundados: &quot; + game.getSunkShips());</b>
+<b class="fc">&nbsp;            out.line(FONT, FONT_SIZE, &quot;Navios ainda a flutuar: &quot; + game.getRemainingShips());</b>
+<b class="fc">&nbsp;            out.line(FONT, FONT_SIZE, &quot;Tiros repetidos: &quot; + game.getRepeatedShots());</b>
+<b class="fc">&nbsp;            out.line(FONT, FONT_SIZE, &quot;Tiros fora do tabuleiro: &quot; + game.getInvalidShots());</b>
+<b class="fc">&nbsp;            out.line(FONT_BOLD, FONT_SIZE, game.getRemainingShips() == 0</b>
+<b class="fc">&nbsp;                    ? &quot;Resultado: frota toda afundada.&quot;</b>
+<b class="fc">&nbsp;                    : &quot;Resultado: jogo ainda em curso.&quot;);</b>
+<b class="fc">&nbsp;            out.blank();</b>
+&nbsp;
+<b class="fc">&nbsp;            out.ensureSpace(Game.BOARD_SIZE + 3); // o tabuleiro não deve ficar partido entre páginas</b>
+<b class="fc">&nbsp;            out.line(FONT_BOLD, 13, &quot;Tabuleiro final&quot;);</b>
+<b class="fc">&nbsp;            for (String row : boardLines(game.getMyFleet(), moves))</b>
+<b class="fc">&nbsp;                out.line(FONT_MONO, FONT_SIZE, row);</b>
+<b class="fc">&nbsp;            out.line(FONT, 9, &quot;Legenda: &#39;#&#39; navio, &#39;*&#39; tiro certeiro, &#39;o&#39; tiro na água, &#39;.&#39; água&quot;);</b>
+&nbsp;
+&nbsp;            out.close();
+<b class="fc">&nbsp;            doc.save(file);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Descreve uma rajada numa linha de texto, por exemplo
+&nbsp;     * {@code &quot;Rajada 3: A5 (água), C10 (tiro em Nau), F5 (Barca ao fundo)&quot;}.
+&nbsp;     *
+&nbsp;     * @param move a rajada
+&nbsp;     * @return a descrição da rajada
+&nbsp;     */
+&nbsp;    static String describeMove(IMove move) {
+<b class="fc">&nbsp;        StringBuilder sb = new StringBuilder(&quot;Rajada &quot;).append(move.getNumber()).append(&quot;: &quot;);</b>
+<b class="fc">&nbsp;        List&lt;IPosition&gt; shots = move.getShots();</b>
+<b class="fc">&nbsp;        List&lt;IGame.ShotResult&gt; results = move.getShotResults();</b>
+<b class="fc">&nbsp;        for (int i = 0; i &lt; shots.size(); i++) {</b>
+<b class="fc">&nbsp;            if (i &gt; 0)</b>
+<b class="fc">&nbsp;                sb.append(&quot;, &quot;);</b>
+<b class="fc">&nbsp;            sb.append(shots.get(i));</b>
+<b class="fc">&nbsp;            if (i &lt; results.size())</b>
+<b class="fc">&nbsp;                sb.append(&quot; (&quot;).append(describeShot(results.get(i))).append(&quot;)&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return sb.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Traduz o resultado de um tiro para texto.
+&nbsp;     *
+&nbsp;     * @param result o resultado do tiro
+&nbsp;     * @return a descrição do resultado
+&nbsp;     */
+&nbsp;    static String describeShot(IGame.ShotResult result) {
+<b class="fc">&nbsp;        if (!result.valid())</b>
+<b class="fc">&nbsp;            return &quot;fora do tabuleiro&quot;;</b>
+<b class="fc">&nbsp;        if (result.repeated())</b>
+<b class="fc">&nbsp;            return &quot;repetido&quot;;</b>
+<b class="fc">&nbsp;        if (result.ship() == null)</b>
+<b class="fc">&nbsp;            return &quot;água&quot;;</b>
+<b class="fc">&nbsp;        if (result.sunk())</b>
+<b class="fc">&nbsp;            return result.ship().getCategory() + &quot; ao fundo&quot;;</b>
+<b class="fc">&nbsp;        return &quot;tiro em &quot; + result.ship().getCategory();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Constrói o tabuleiro em texto, com os navios e os tiros recebidos.
+&nbsp;     *
+&nbsp;     * @param fleet a frota
+&nbsp;     * @param moves as rajadas recebidas
+&nbsp;     * @return as linhas do tabuleiro
+&nbsp;     */
+&nbsp;    static List&lt;String&gt; boardLines(IFleet fleet, List&lt;IMove&gt; moves) {
+<b class="fc">&nbsp;        char[][] map = new char[Game.BOARD_SIZE][Game.BOARD_SIZE];</b>
+<b class="fc">&nbsp;        for (char[] row : map)</b>
+<b class="fc">&nbsp;            java.util.Arrays.fill(row, &#39;.&#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;        for (IShip ship : fleet.getShips())</b>
+<b class="fc">&nbsp;            for (IPosition pos : ship.getPositions())</b>
+<b class="fc">&nbsp;                map[pos.getRow()][pos.getColumn()] = &#39;#&#39;;</b>
+&nbsp;
+<b class="fc">&nbsp;        for (IMove move : moves)</b>
+<b class="fc">&nbsp;            for (IPosition shot : move.getShots())</b>
+<b class="fc">&nbsp;                if (shot.isInside()) {</b>
+<b class="fc">&nbsp;                    char c = map[shot.getRow()][shot.getColumn()];</b>
+<b class="fc">&nbsp;                    map[shot.getRow()][shot.getColumn()] = (c == &#39;#&#39; || c == &#39;*&#39;) ? &#39;*&#39; : &#39;o&#39;;</b>
+&nbsp;                }
+&nbsp;
+<b class="fc">&nbsp;        List&lt;String&gt; lines = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        StringBuilder header = new StringBuilder(&quot;   &quot;);</b>
+<b class="fc">&nbsp;        for (int c = 1; c &lt;= Game.BOARD_SIZE; c++)</b>
+<b class="fc">&nbsp;            header.append(String.format(&quot;%-3d&quot;, c));</b>
+<b class="fc">&nbsp;        lines.add(header.toString().stripTrailing());</b>
+<b class="fc">&nbsp;        for (int r = 0; r &lt; Game.BOARD_SIZE; r++) {</b>
+<b class="fc">&nbsp;            StringBuilder sb = new StringBuilder().append((char) (&#39;A&#39; + r)).append(&quot;  &quot;);</b>
+<b class="fc">&nbsp;            for (int c = 0; c &lt; Game.BOARD_SIZE; c++)</b>
+<b class="fc">&nbsp;                sb.append(map[r][c]).append(&quot;  &quot;);</b>
+<b class="fc">&nbsp;            lines.add(sb.toString().stripTrailing());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return lines;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Escreve linhas de texto de cima para baixo, criando uma página nova quando a atual enche.
+&nbsp;     */
+&nbsp;    private static final class PageWriter {
+&nbsp;        private final PDDocument doc;
+&nbsp;        private PDPageContentStream stream;
+&nbsp;        private float y;
+&nbsp;
+<b class="fc">&nbsp;        PageWriter(PDDocument doc) throws IOException {</b>
+<b class="fc">&nbsp;            this.doc = doc;</b>
+<b class="fc">&nbsp;            newPage();</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        private void newPage() throws IOException {
+<b class="fc">&nbsp;            if (stream != null)</b>
+<b class="fc">&nbsp;                stream.close();</b>
+<b class="fc">&nbsp;            PDPage page = new PDPage(PDRectangle.A4);</b>
+<b class="fc">&nbsp;            doc.addPage(page);</b>
+<b class="fc">&nbsp;            stream = new PDPageContentStream(doc, page);</b>
+<b class="fc">&nbsp;            y = page.getMediaBox().getHeight() - MARGIN;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        void line(PDType1Font font, float size, String text) throws IOException {
+<b class="fc">&nbsp;            if (y &lt; MARGIN)</b>
+<b class="fc">&nbsp;                newPage();</b>
+<b class="fc">&nbsp;            stream.beginText();</b>
+<b class="fc">&nbsp;            stream.setFont(font, size);</b>
+<b class="fc">&nbsp;            stream.newLineAtOffset(MARGIN, y);</b>
+<b class="fc">&nbsp;            stream.showText(text);</b>
+<b class="fc">&nbsp;            stream.endText();</b>
+<b class="fc">&nbsp;            y -= Math.max(LEADING, size + 4);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        void ensureSpace(int lines) throws IOException {
+<b class="fc">&nbsp;            if (y - lines * LEADING &lt; MARGIN)</b>
+<b class="fc">&nbsp;                newPage();</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        void blank() {
+<b class="fc">&nbsp;            y -= LEADING / 2;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        void close() throws IOException {
+<b class="fc">&nbsp;            stream.close();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-11-22 10:10</div>
+</div>
+</body>
+</html>
